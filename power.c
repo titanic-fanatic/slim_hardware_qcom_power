@@ -161,9 +161,11 @@ static void touch_boost()
 
     snprintf(data, MAX_LENGTH, "1:%d", client);
     rc = sendto(client_sockfd, data, strlen(data), 0, (const struct sockaddr *)&client_addr, sizeof(struct sockaddr_un));
+#ifdef TOUCH_BOOST_DEBUG
     if (rc < 0) {
         ALOGE("%s: failed to send: %s", __func__, strerror(errno));
     }
+#endif
 }
 
 static void power_set_interactive(struct power_module *module, int on)
