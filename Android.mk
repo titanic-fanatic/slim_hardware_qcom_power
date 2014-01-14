@@ -25,6 +25,10 @@ ifeq ($(TOUCH_BOOST_DEBUG),true)
 LOCAL_CFLAGS += -DTOUCH_BOOST_DEBUG
 endif
 
+ifeq ($(TARGET_POWERHAL_NO_TOUCH_BOOST),true)
+LOCAL_CFLAGS += -DNO_TOUCH_BOOST
+endif
+
 include $(BUILD_SHARED_LIBRARY)
 endif
 endif
