@@ -43,6 +43,27 @@ static int client_sockfd;
 static struct sockaddr_un client_addr;
 static int last_state = -1;
 
+static void sysfs_write(char *path, char *s)
+{
+    char buf[80];
+    int len;
+    int fd = open(path, O_WRONLY);
+
+    if (fd < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error opening %s: %s\n", path, buf);
+        return;
+    }
+
+    len = write(fd, s, strlen(s));
+    if (len < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error writing to %s: %s\n", path, buf);
+    }
+
+    close(fd);
+}
+
 static void socket_init()
 {
     if (!client_sockfd) {
@@ -149,24 +170,7 @@ static void process_video_encode_hint(void *metadata)
 #ifdef TOUCH_BOOST
 static void touch_boost()
 {
-    int rc;
-    pid_t client;
-    char data[MAX_LENGTH];
-
-    if (client_sockfd < 0) {
-        ALOGE("%s: boost socket not created", __func__);
-        return;
-    }
-
-    client = getpid();
-
-    snprintf(data, MAX_LENGTH, "1:%d", client);
-    rc = sendto(client_sockfd, data, strlen(data), 0, (const struct sockaddr *)&client_addr, sizeof(struct sockaddr_un));
-#ifdef TOUCH_BOOST_DEBUG
-    if (rc < 0) {
-        ALOGE("%s: failed to send: %s", __func__, strerror(errno));
-    }
-#endif
+    sysfs_write("/sys/module/userspace_cpu_boost/parameters/boost_now", "1");
 }
 #endif
 
